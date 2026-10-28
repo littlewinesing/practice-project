@@ -1,1 +1,115 @@
+import pyautogui
+import keyboard
+import threading
+import random
+import time
 
+#-----------------------------游戏行为和内容类-----------------------------------
+class arknight():
+    """定义明日方舟有哪些操作和属性"""
+    def __init__(self):
+        self.click_position = {
+                            #示例：某某：（x坐标 ， y坐标 ， 点击次数 ，每次间隔）
+                            '开始' : (2 , 3 , 1 , 0) , 
+                            '开始唤醒' : (1289 , 1068 , 1 , 0), 
+                            '叉掉新闻页' : (4 , 4 , 1 , 0) ,
+                            '基建' : (2013 , 1276 , 1 , 0) , 
+                            '基建点击' : (2462 , 244 , 1 , 0) ,
+                            '基建收取' : (436 , 1532 , 4 , 2) ,
+                            'home键' : (484 , 68 , 1 , 0) , 
+                            '终端键' : (1072 , 142 , 1 , 0) , 
+                            '剿灭按键' : (2115 , 224 , 1 , 0) , 
+                            '开始剿灭' : (2287 , 1473 , 3 , 2) , 
+                            '完成剿灭' : (100 , 100 , 1 , 0) , 
+                            '首页键' : (289 , 474 , 1 , 0) , 
+                            '任务键' : (1624 , 1255 , 1 , 0) ,
+                            '收集全部键' : (2090 , 198 , 1 , 0) ,
+                            '采购中心' : (1645 , 1027 , 1 , 0) , 
+                            '信用交易所' : (2251 , 185 , 1 , 0) , 
+                            '购物品1' : (318 , 702 , 1 , 0) , 
+                            '购物品2' : () , 
+                            '购物点' : (1838 , 1153 , 2 , 1)
+                        }
+    
+    def back_to_home(self) :
+        """这是从别的页面回首页，回了会暂停2秒程序，给他加载"""
+        pyautogui.click(x = self.click_position['home键'][0] , y = self.click_position['home键'][1])
+        pyautogui.click(x = self.click_position['首页键'][0] , y = self.click_position['首页键'][1])
+        time.sleep(2)
+    
+    def come_to_kill(self) :
+        """这是从基建直接去终端打剿灭的，只能从基建去，不然不会有home键给你点"""
+        pyautogui.click(x = self.click_position['home键'][0] , y = self.click_position['home键'][1])
+        pyautogui.click(x = self.click_position['终端键'][0] , y = self.click_position['终端键'][1])
+        time.sleep(2)
+        pyautogui.click(x = self.click_position['剿灭按键'][0] , y = self.click_position['剿灭按键'][1])
+        time.sleep(2)
+        pyautogui.click(x = self.click_position['开始剿灭'][0] , y = self.click_position['开始剿灭'][1] , clicks = 3 , interval = 2)
+        time.sleep(2)
+    
+    def come_to_control(self) :
+        """这是从首页进基建，点击基建键后要暂停3秒，因为卡基建orz"""
+        pyautogui.click(x = self.click_position['基建'][0] , y = self.click_position['基建'][1])
+        time.sleep(3)
+        pyautogui.click(x = self.click_position['基建点击'][0] , y = self.click_position['基建点击'][1] , clicks = 4 , interval = 2)
+        time.sleep(3)
+    
+    def get_the_gift(self) :
+        """这是去领取每日任务奖励，请务必保证在首页"""
+        pyautogui.click(x = self.click_position['任务键'][0] , y = self.click_position['任务键'][1])
+        pyautogui.click(x = self.click_position['收集全部键'][0] , y = self.click_position['收集全部键'][1])
+    
+    def store_center_cridit_shop(self):
+        """这是去信用交易所收取信用然后购买商品"""
+        pyautogui.click(x = self.click_position['采购中心'][0] , y = self.click_position['采购中心'][1])
+        pyautogui.click(x = self.click_position['信用交易所'][0] , y = self.click_position['信用交易所'][1])
+        pyautogui.click(x = self.click_position['购物品1'][0] , y = self.click_position['购物品1'][1])
+        pyautogui.click(x = self.click_position['购物点'][0] , y = self.click_position['购物点'][1] , clicks = 2 , interval =2)
+        
+    def quit_game_to_win() :
+        """退出游戏"""
+        keyboard.press_and_release('esc')
+        pyautogui.click(1847 , 1052)
+
+#---------------------------------配置区----------------------------------------
+click_interval = random.uniform(0.1 , 0.5) #点击的间隔
+start_delay = 8 #启动前延迟，方便切换到明日方舟界面
+exit_key = 'q' #设置安全词，避免玩得太过火orz
+pyautogui.PAUSE = 2 #点击后等待2秒避免过快点击
+pyautogui.FAILSAFE = True #强制退出，鼠标移动到最左上强制退出程序
+stop_event = threading.Event() #设置独立的退出线程
+game = arknight()
+
+#===============================退出识别程序======================================
+
+def safe_guard() :
+    '''安全词判断'''
+    print("开始检测安全词 , 按下'q'键推出程序")
+    keyboard.wait(exit_key)
+    stop_event.set()
+    print('exit key has been openned , the code is closing!')
+
+#===============================主要流程==================================
+
+def main():
+    print(f"脚本已经启动，{start_delay}秒后开始程序")
+    time.sleep(10)
+    game.come_to_control()
+    game.come_to_kill()
+    game.back_to_home()
+    game.store_center_cridit_shop()
+    game.back_to_home()
+    game.get_the_gift()
+    game.back_to_home()
+    game.quit_game_to_win()
+
+#===============================下面正式开始实施==================================
+
+if __name__ == "__main__" :
+    threading.Thread(target = safe_guard , daemon = True).start()
+    try:
+        main()
+    except KeyboardInterrupt :
+        print("/n收到CTRL＋c强制退出")
+    finally:
+        print("程序结束")
